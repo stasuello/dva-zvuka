@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Два звука</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: тихий, бережный, без лишних слов — инструмент для практики
+   IDEA: пульт с двумя источниками звука; активный «светится», второй приглушён
+   PICTURE: большое кольцо 10-секундного отрезка с названием звука, под ним два источника
+   COLOUR and TYPE: морская бирюза (море) + коралл (часы) на светлом/ночном фоне; Manrope
+   LAYOUT: заголовок, кольцо, источники, управление, настройки — одна колонка */
+:root{color-scheme:light dark;--bg:light-dark(#eaf2f2,#0a1a1e);--card:light-dark(#ffffff,#10262c);--ink:light-dark(#0d2a33,#e4f0f0);--mute:light-dark(#5b7379,#8aa5aa);--line:light-dark(#d2e1e2,#1d3a41);--sea:light-dark(#1f7f8f,#4fc0cf);--clk:light-dark(#d4583c,#ff8a6b)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Manrope,system-ui,sans-serif;overflow-x:clip}
+main{max-width:720px;margin:0 auto;padding:clamp(20px,4vw,48px) max(5vw,16px) 48px}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.05;margin:0 0 6px;font-weight:800;text-wrap:balance}
+.sub{color:var(--mute);margin:0 0 24px;max-width:60ch}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:clamp(20px,4vw,36px);display:grid;gap:24px;justify-items:center}
+.ring{position:relative;width:min(300px,72vw);aspect-ratio:1}
+.ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:10}
+.ring .bgc{stroke:var(--line)}
+.ring .fg{stroke:var(--sea);stroke-linecap:round;transition:stroke .4s}
+.ring.b .fg{stroke:var(--clk)}
+.center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:2px}
+.center small{color:var(--mute);font-size:14px}
+.center b{font-size:clamp(30px,8vw,44px);line-height:1.05;font-weight:800;color:var(--sea);transition:color .4s}
+.ring.b .center b{color:var(--clk)}
+.center span{font-size:22px;font-variant-numeric:tabular-nums;font-weight:600}
+.src{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;width:100%}
+.s{border:2px solid var(--line);border-radius:18px;padding:14px 16px;transition:all .4s;opacity:.55}
+.s.on{opacity:1;transform:scale(1.02)}
+.s.a.on{border-color:var(--sea);box-shadow:0 0 0 6px color-mix(in srgb,var(--sea) 15%,transparent)}
+.s.b.on{border-color:var(--clk);box-shadow:0 0 0 6px color-mix(in srgb,var(--clk) 15%,transparent)}
+.s h3{margin:0;font-size:17px}.s p{margin:2px 0 10px;color:var(--mute);font-size:14px}
+.s label{font-size:13px;color:var(--mute);display:block}
+input[type=range]{width:100%;accent-color:var(--sea);height:28px}
+.s.b input{accent-color:var(--clk)}
+.total{width:100%}
+.bar{height:8px;border-radius:8px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sea),var(--clk))}
+.meta{display:flex;justify-content:space-between;font-size:14px;color:var(--mute);margin-top:6px;font-variant-numeric:tabular-nums}
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 24px;border-radius:999px;border:2px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
+button.main{background:var(--ink);color:var(--bg)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+details{margin-top:20px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:4px 20px}
+summary{cursor:pointer;font-weight:600;min-height:48px;display:flex;align-items:center}
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;padding-bottom:18px}
+.set label{display:grid;gap:4px;font-size:14px;color:var(--mute)}
+select{font:inherit;font-size:16px;min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:0 10px}
+.chk{display:flex!important;grid-template-columns:none;align-items:center;gap:10px;color:var(--ink)!important}
+.chk input{width:20px;height:20px;accent-color:var(--sea)}
+.tip{color:var(--mute);font-size:14px;margin:20px 0 0;max-width:62ch}
+.done{font-weight:600;color:var(--sea);min-height:1.5em;text-align:center;margin:0}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media(max-width:420px){.src{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Два звука</h1>
+  <p class="sub">Оба звука звучат всё время. Каждые 10 секунд переводи внимание на тот, что подсвечен, — второй просто остаётся фоном.</p>
+
+  <section class="stage">
+    <div class="ring" id="ring">
+      <svg viewBox="0 0 120 120"><circle class="bgc" cx="60" cy="60" r="54"/><circle class="fg" id="arc" cx="60" cy="60" r="54" stroke-dasharray="339.3" stroke-dashoffset="339.3"/></svg>
+      <div class="center"><small id="hint">Нажми «Начать»</small><b id="name">Море</b><span id="secs">10</span></div>
+    </div>
+
+    <div class="src">
+      <div class="s a on" id="sa"><h3>Море</h3><p>низкий шум волн, слева</p><label for="va">Громкость</label><input id="va" type="range" min="0" max="100" value="60"></div>
+      <div class="s b" id="sb"><h3>Часы</h3><p>тиканье, справа</p><label for="vb">Громкость</label><input id="vb" type="range" min="0" max="100" value="55"></div>
+    </div>
+
+    <div class="total"><div class="bar"><i id="prog"></i></div><div class="meta"><span id="el">0:00</span><span id="sw">Переключений: 0</span><span id="left">10:00</span></div></div>
+    <p class="done" id="done" aria-live="polite"></p>
+    <div class="ctrl"><button class="main" id="go">Начать</button><button id="reset">Сначала</button></div>
+  </section>
+
+  <details>
+    <summary>Настройки</summary>
+    <div class="set">
+      <label>Длительность<select id="dur"><option value="5">5 минут</option><option value="10" selected>10 минут</option><option value="15">15 минут</option></select></label>
+      <label>Отрезок<select id="int"><option value="5">5 секунд</option><option value="10" selected>10 секунд</option><option value="15">15 секунд</option><option value="20">20 секунд</option></select></label>
+      <label class="chk"><input type="checkbox" id="chime" checked>Тихий сигнал при смене</label>
+      <label class="chk"><input type="checkbox" id="voice">Голосом называть звук</label>
+    </div>
+  </details>
+  <p class="tip">Лучше в наушниках: море слышно слева, часы справа. Если мысли уходят в сторону — это нормально, просто мягко верни внимание к подсвеченному звуку.</p>
+</main>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const C=339.3;
+let ctx=null,master,seaG,clkG,tickTimer=null,nextTick=0,tickN=0;
+let running=false,elapsed=0,last=0,raf=0,lastSeg=-1,switches=0,wake=null;
+const st={dur:10,int:10};
+
+try{const s=JSON.parse(localStorage.getItem('att2')||'{}');
+  if(s.va!=null)$('va').value=s.va;if(s.vb!=null)$('vb').value=s.vb;
+  if(s.dur)$('dur').value=s.dur;if(s.int)$('int').value=s.int;
+  if(s.chime!=null)$('chime').checked=s.chime;if(s.voice!=null)$('voice').checked=s.voice;}catch(e){}
+const save=()=>{try{localStorage.setItem('att2',JSON.stringify({va:$('va').value,vb:$('vb').value,dur:$('dur').value,int:$('int').value,chime:$('chime').checked,voice:$('voice').checked}))}catch(e){}};
+const readSet=()=>{st.dur=+$('dur').value;st.int=+$('int').value};
+readSet();
+
+function fmt(ms){const s=Math.max(0,Math.round(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+
+function buildAudio(){
+  ctx=new (window.AudioContext||window.webkitAudioContext)();
+  master=ctx.createGain();master.gain.value=0.9;master.connect(ctx.destination);
+  // море: коричневый шум + фильтр + медленная «волна»
+  const len=ctx.sampleRate*6,buf=ctx.createBuffer(2,len,ctx.sampleRate);
+  for(let ch=0;ch<2;ch++){const d=buf.getChannelData(ch);let l=0;for(let i=0;i<len;i++){const w=Math.random()*2-1;l=(l+0.02*w)/1.02;d[i]=l*3.2}}
+  const src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
+  const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=700;
+  const swell=ctx.createGain();swell.gain.value=0.6;
+  const lfo=ctx.createOscillator();lfo.frequency.value=0.1;const lg=ctx.createGain();lg.gain.value=0.35;lfo.connect(lg);lg.connect(swell.gain);lfo.start();
+  seaG=ctx.createGain();const pa=ctx.createStereoPanner();pa.pan.value=-0.6;
+  src.connect(lp);lp.connect(swell);swell.connect(seaG);seaG.connect(pa);pa.connect(master);src.start();
+  // часы
+  clkG=ctx.createGain();const pb=ctx.createStereoPanner();pb.pan.value=0.6;clkG.connect(pb);pb.connect(master);
+  setVols();
+}
+function tick(t,hi){
+  const n=Math.floor(ctx.sampleRate*0.04),b=ctx.createBuffer(1,n,ctx.sampleRate),d=b.getChannelData(0);
+  for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(n*0.12));
+  const s=ctx.createBufferSource();s.buffer=b;
+  const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=hi?3200:2300;bp.Q.value=4;
+  const g=ctx.createGain();g.gain.value=1.6;
+  s.connect(bp);bp.connect(g);g.connect(clkG);s.start(t);
+}
+function scheduler(){while(nextTick<ctx.currentTime+0.3){tick(nextTick,tickN++%2===0);nextTick+=1}}
+function setVols(){if(!ctx)return;const a=$('va').value/100,b=$('vb').value/100;
+  seaG.gain.setTargetAtTime(a*a*1.2,ctx.currentTime,0.1);clkG.gain.setTargetAtTime(b*b*1.2,ctx.currentTime,0.1)}
+function chime(f=880,v=0.12){if(!ctx)return;const o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime;
+  o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+1.2);
+  o.connect(g);g.connect(master);o.start(t);o.stop(t+1.3)}
+function say(txt){try{if(!$('voice').checked||!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='ru-RU';u.rate=0.95;u.volume=0.8;speechSynthesis.speak(u)}catch(e){}}
+
+function render(){
+  const total=st.dur*60000,iv=st.int*1000;
+  const seg=Math.floor(elapsed/iv),inSeg=elapsed-seg*iv,isB=seg%2===1;
+  $('ring').classList.toggle('b',isB);
+  $('sa').classList.toggle('on',!isB);$('sb').classList.toggle('on',isB);
+  $('name').textContent=isB?'Часы':'Море';
+  $('secs').textContent=Math.max(1,Math.ceil((iv-inSeg)/1000));
+  $('arc').style.strokeDashoffset=C*(1-inSeg/iv);
+  $('prog').style.width=Math.min(100,elapsed/total*100)+'%';
+  $('el').textContent=fmt(elapsed);$('left').textContent=fmt(total-elapsed);
+  $('sw').textContent='Переключений: '+switches;
+  return seg;
+}
+function loop(now){
+  if(!running)return;
+  elapsed+=now-last;last=now;
+  const total=st.dur*60000;
+  if(elapsed>=total){elapsed=total;render();finish();return}
+  const seg=render();
+  if(seg!==lastSeg){if(lastSeg>=0){switches++;if($('chime').checked)chime(seg%2?660:880);say(seg%2?'часы':'море')}lastSeg=seg}
+  raf=requestAnimationFrame(loop);
+}
+async function start(){
+  try{
+    if(!ctx)buildAudio();
+    await ctx.resume();
+  }catch(e){$('done').textContent='Браузер не дал включить звук. Попробуй ещё раз.';return}
+  if(!tickTimer){nextTick=ctx.currentTime+0.1;tickTimer=setInterval(scheduler,100)}
+  if(elapsed===0){lastSeg=0;say('море')}
+  running=true;last=performance.now();$('go').textContent='Пауза';$('hint').textContent='Слушай';$('done').textContent='';
+  $('dur').disabled=$('int').disabled=true;
+  try{if(navigator.wakeLock)wake=await navigator.wakeLock.request('screen')}catch(e){}
+  raf=requestAnimationFrame(loop);
+}
+function pause(){
+  running=false;cancelAnimationFrame(raf);
+  if(tickTimer){clearInterval(tickTimer);tickTimer=null}
+  if(ctx)ctx.suspend();
+  $('go').textContent='Продолжить';$('hint').textContent='Пауза';
+  try{wake&&wake.release();wake=null}catch(e){}
+}
+function finish(){
+  pause();
+  if(ctx){ctx.resume().then(()=>{seaG.gain.setTargetAtTime(0,ctx.currentTime,0.6);clkG.gain.setTargetAtTime(0,ctx.currentTime,0.6);chime(660,0.15);setTimeout(()=>chime(880,0.15),400);setTimeout(()=>{ctx.suspend();setVols()},3000)})}
+  $('go').textContent='Ещё раз';$('hint').textContent='Готово';
+  $('done').textContent='Упражнение закончено. Переключений: '+switches+'.';
+  $('dur').disabled=$('int').disabled=false;
+  elapsed=-1;
+}
+function reset(){
+  pause();elapsed=0;switches=0;lastSeg=-1;
+  $('go').textContent='Начать';$('hint').textContent='Нажми «Начать»';$('done').textContent='';
+  $('dur').disabled=$('int').disabled=false;readSet();render();
+}
+$('go').addEventListener('click',()=>{
+  if(running)pause();
+  else{if(elapsed<0){reset()}start()}
+});
+$('reset').addEventListener('click',reset);
+['va','vb'].forEach(id=>$(id).addEventListener('input',()=>{setVols();save()}));
+['dur','int'].forEach(id=>$(id).addEventListener('change',()=>{readSet();save();if(!running)render()}));
+['chime','voice'].forEach(id=>$(id).addEventListener('change',save));
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&e.target.tagName!=='SELECT'&&e.target.tagName!=='INPUT'){e.preventDefault();$('go').click()}});
+render();
+}
+</script>
+</body>
+</html>
